@@ -39,6 +39,7 @@ function auto_create_incidents($params) {
  $contactid = $params['contactid'];
  $subject = $params['subject'];
  $decoded = $params['decoded'];
+ //$now must be here otherwise dates get messed up for new cases
  global $CONFIG, $now, $dbIncidents;
  debug_log("incident ID : ".$incidentid." \n  Contactid:  ".$contactid."\n"."Subject : ".$subject);
 
