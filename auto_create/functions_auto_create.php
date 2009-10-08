@@ -93,7 +93,7 @@ function find_duplicate_cases($subject, $contactid) {
 
   $our_title = $title_test[$i];
   $match_incidentid = $title_incidentid[$i];
-  if(preg_match("/".preg_quote($our_title)."/i",$lower_subject)) {
+  if(preg_match("/".preg_quote($our_title, '/')."/i",$lower_subject)) {
    debug_log("Row title:  ".$our_title);
    debug_log("Matching id:  ".$match_incidentid);
    $pass_incidentid = $match_incidentid;
