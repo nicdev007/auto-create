@@ -28,9 +28,9 @@ require_once (APPLICATION_FSPATH.DIRECTORY_SEPARATOR.'core.php');
  * or "Warranty [Productname] Serial number Reference"
  * This helps to simplify the creation, and detection of this function
  * @author Nico du toit
- * @return Returns the newly created incidentid to the inbopund script to
- * continue processing
- * OR returns nothing and the new update goes to the holding queue as before
+ * @return Returns the newly created incidentid to the inbound script to
+ * continue processing OR returns no incidentid and sets the $GLOBALS['plugin_reason']
+ *  and the new update goes to the holding queue as before
  */
 
 function auto_create_incidents($params) {
@@ -59,29 +59,24 @@ function auto_create_incidents($params) {
 
  $cc = find_cc_decoded($decoded);
  if (stristr($cc, $CONFIG['support_email'])) {
-  debug_log("Support was in the copy of the email!!");
+  //debug_log("Support was in the copy of the email!!");
   $GLOBALS['plugin_reason'] = 'Support in CC of email';
   return;
  }
 
- debug_log("Redirecting to function checking for duplicates ... ");
 
  //Check if duplicates exists in the incidents DB
  $create_incident = check_for_duplicates($subject, $contactid);
 
  if($create_incident == "NO") {
-  debug_log("case 0:   more than 1 duplicate");
   $GLOBALS['plugin_reason'] = 'Email subject is possible DUPLICATE';
   return;
  }
  if ($create_incident !=  "YES" && $create_incident !="NO") {
-  debug_log("case 1:   only 1 duplicate");
   debug_log("The duplicate incidentID =: ".$create_incident);
   return $create_incident;
  }
  if ($create_incident == "YES") {
-  debug_log("case 2:   No duplicates found");
-  debug_log("Proceeding to - Auto create");
 
   $ccemail = $cc;
   $origsubject = mysql_real_escape_string($subject);
