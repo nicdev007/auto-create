@@ -7,7 +7,7 @@
 $PLUGININFO['auto_create']['version'] = 1.1;
 $PLUGININFO['auto_create']['description'] = 'Auto create incidents';
 $PLUGININFO['auto_create']['author'] = 'Nicolaas du Toit';
-$PLUGININFO['auto_create']['legal'] = 'legal';
+$PLUGININFO['auto_create']['legal'] = 'GPL';
 $PLUGININFO['auto_create']['sitminversion'] = 3.45;
 $PLUGININFO['auto_create']['sitmaxversion'] = 3.60;
 
