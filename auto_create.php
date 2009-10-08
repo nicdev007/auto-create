@@ -39,7 +39,7 @@ function auto_create_incidents($params) {
  $contactid = $params['contactid'];
  $subject = $params['subject'];
  $decoded = $params['decoded'];
- global $CONFIG, $dbIncidents;
+ global $CONFIG, $dbIncidents, $now;
  debug_log("incident ID : ".$incidentid." \n  Contactid:  ".$contactid."\n"."Subject : ".$subject);
 
  if ($incidentid > 0) {
