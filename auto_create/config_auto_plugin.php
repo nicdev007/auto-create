@@ -12,6 +12,6 @@ $CONFIG['contract_name_2'] = 'Software';
 */
 
 //Array of contacts for whom we should not auto create like array(10, 25, etc)
-$CONFIG['auto_create_contact_exclude'] = array(24, 55);
+$CONFIG['auto_create_contact_exclude'] = array();
 
 
