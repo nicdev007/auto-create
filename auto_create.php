@@ -65,7 +65,6 @@ function auto_create_incidents($params) {
   return;
  }
 
- debug_log("Redirecting to function checking for duplicates ... ");
 
  //Check if duplicates exists in the incidents DB
  $create_incident = check_for_duplicates($subject, $contactid);
@@ -76,13 +75,10 @@ function auto_create_incidents($params) {
   return;
  }
  if ($create_incident !=  "YES" && $create_incident !="NO") {
-  debug_log("case 1:   only 1 duplicate");
   debug_log("The duplicate incidentID =: ".$create_incident);
   return $create_incident;
  }
  if ($create_incident == "YES") {
-  debug_log("case 2:   No duplicates found");
-  debug_log("Proceeding to - Auto create");
 
   $ccemail = $cc;
   $origsubject = mysql_real_escape_string($subject);
