@@ -194,4 +194,59 @@ function find_cc_decoded($decoded) {
  return $cc;
 }
 
+/**
+ * Search the passed subject for keywords in the tags DB.
+ * @author Nicolaas du Toit
+ * @param string $subject. The subject from the inbound script
+ * @return The "id" of the skill that matched the tag. ONLY the $matches[0] of the
+ * preg_match(). If no match is found returns FALSE
+ */
+
+function find_tags_in_subject($subject) {
+ global $dbTags, $dbSetTags;
+
+ $lower_subject = strtolower($subject);
+ $sql = "SELECT name, tagid FROM `{$dbTags}` ";
+ $result = mysql_query($sql);
+ if (mysql_error()) trigger_error("MySQL Query Error ".mysql_error(), E_USER_WARNING);
+
+ $count=0;
+
+ $nmbresult= mysql_num_rows($result);
+ $i = 0;
+ while ($row=mysql_fetch_object($result)) {
+
+  $tag_name[]=$row->name;
+  $tag_id[]=$row->tagid;
+
+  $tag = str_replace("|", " ", "$tag_name[$i]");
+  $tagid = $tag_id[$i];
+  if(preg_match("/".preg_quote($tag, '/')."/i",$lower_subject, $matches)) {
+   $tag_array[] = $tagid;
+   $count++;
+  }
+  $i++;
+ }
+
+  $this_tag = $tag_array[0];
+  $sql = "SELECT * FROM `{$dbSetTags}` WHERE tagid = '$this_tag'";
+  $result = mysql_query($sql);
+   if (mysql_error()) trigger_error(mysql_error(),E_USER_WARNING);
+   $obj = mysql_fetch_object($result);
+   $productid = $obj->id;
+
+   $sql = "SELECT id, name FROM `sit_software` WHERE id = '$obj->id}'";
+   $resultskill = mysql_query($sql);
+   if (mysql_error()) trigger_error(mysql_error(),E_USER_WARNING);
+   if (mysql_num_rows($resultskill) > 0)
+   {
+     $objskill = mysql_fetch_object($resultskill);
+     $skillname = $objskill->name;
+     $skillid = $objskill->id;
+     debug_log("Skill name from tag function:  ".$skillname);
+     return $skillid;
+   }
+   else return;
+   
+}
 ?>
