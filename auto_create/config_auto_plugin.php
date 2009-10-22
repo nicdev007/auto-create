@@ -14,4 +14,7 @@ $CONFIG['contract_name_2'] = 'Software';
 //Array of contacts for whom we should not auto create like array(10, 25, etc)
 $CONFIG['auto_create_contact_exclude'] = array();
 
+//For warranty only: A restrictive list of skills in the list that apply - array(10, 25, etc)
+$CONFIG['auto_create_warranty_include'] = array(55,56,57,58,59,60,61,62,63,64);
+
 
