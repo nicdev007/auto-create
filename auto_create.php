@@ -65,6 +65,7 @@ function auto_create_incidents($params) {
   return;
  }
 
+ debug_log("Redirecting to function checking for duplicates ... ");
 
  //Check if duplicates exists in the incidents DB
  $create_incident = check_for_duplicates($subject, $contactid);
@@ -75,10 +76,13 @@ function auto_create_incidents($params) {
   return;
  }
  if ($create_incident !=  "YES" && $create_incident !="NO") {
+  debug_log("case 1:   only 1 duplicate");
   debug_log("The duplicate incidentID =: ".$create_incident);
   return $create_incident;
  }
  if ($create_incident == "YES") {
+  debug_log("case 2:   No duplicates found");
+  debug_log("Proceeding to - Auto create");
 
   $ccemail = $cc;
   $origsubject = mysql_real_escape_string($subject);
@@ -86,17 +90,21 @@ function auto_create_incidents($params) {
 
   //Check if any of our keywords exists TODO: Need to make the keywords
   //configurable in the config file
-  if (preg_match("/warranty|warrantee|waranty|diagnostic/i", $subject)) {
+  $warranty = preg_match("/warranty|warrantee|waranty|diagnostic/i", $subject);
+  $hard = preg_match("/hardware|hard/i", $subject);
+  $soft = preg_match("/soft|software/i", $subject);
+  
+  if ($warranty == 1 && $hard == 0 && $soft == 0) {
    $case = 0;
    debug_log("Match for Warranty in : ".$subject);
   }
 
-  elseif (preg_match("/hardware|hard|ups/i", $subject)) {
+  elseif ($hard == 1 && $soft == 0 && $warranty == 0) {
    $case = 1;
    debug_log("Match for Hardware in : ".$subject);
   }
 
-  elseif (preg_match("/soft|software/i", $subject)) {
+  elseif ($soft == 1 && $hard == 0 && $warranty == 0) {
    $case = 2;
    debug_log("Match for Software in : ".$subject);
   }
@@ -111,7 +119,14 @@ function auto_create_incidents($params) {
    case 0:
     debug_log("Case type Warranty : ");
     $product = 9;//Hardware
-    $software = 41;//Warranty clam
+    //$software = 41;//Warranty clam
+    $software = find_tags_in_subject($subject);
+    debug_log("The software tag returned is : ".$software);
+    if (!$software || !(in_array($software, $CONFIG['auto_create_warranty_include']))){
+     debug_log("The soft is not in the accepted warranty list or is 0 :");
+     $software = 41;//if no tags are found use the normal warranty claim
+    }
+
     $servicelevel = $CONFIG['default_service_level'];
 
     $siteid = contact_siteid($contactid);
@@ -201,7 +216,12 @@ function auto_create_incidents($params) {
     }
     //nothing found (no [] brackets or empty) so we set a sentence that matches the same as in our DB
     elseif (!$recovprod) {
-     $prodword = 'HARDWARE NOT AUTOMATICALLY RECOGNISED';
+     //$prodword = 'HARDWARE NOT AUTOMATICALLY RECOGNISED';
+      $prodword = software_name(find_tags_in_subject($subject));
+       if (!$prodword){
+        $GLOBALS['plugin_reason'] = 'Hardware [Skill-Product not set]';
+        return;
+       }
     }
 
     $sql = "SELECT LOWER(id) FROM `sit_software` WHERE name LIKE '%$prodword%' ";
@@ -213,7 +233,9 @@ function auto_create_incidents($params) {
     //No match found
     if ($numresults == 0) {
     //Set the software to a precreated value in the DB
-     $software = 53;
+     //$software = 53;
+     $GLOBALS['plugin_reason'] = 'Hardware [Skill-Product not set]';
+        return;
     }
     //Multiple matches found, take the first one
     //TODO: Improve this as it is not that accurate
@@ -323,10 +345,14 @@ function auto_create_incidents($params) {
     if ($recovprod) {
      $prodword = $recovprod;
     }
-    else
     //nothing found (no [] brackets or empty) so we set a sentence that matches the same as in our DB
-    {
-     $prodword = 'SOFTWARE NOT AUTOMATICALLY RECOGNISED';
+    elseif (!$recovprod) {
+     //$prodword = 'SOFTWARE NOT AUTOMATICALLY RECOGNISED';
+      $prodword = software_name(find_tags_in_subject($subject));
+       if (!$prodword){
+        $GLOBALS['plugin_reason'] = 'Software [Skill-Product not set]';
+        return;
+       }
     }
 
     $sql = "SELECT LOWER(id) FROM `sit_software` WHERE name LIKE '%$prodword%' ";
@@ -337,7 +363,9 @@ function auto_create_incidents($params) {
     $row = mysql_fetch_row($result);
     //No match found
     if ($numresults == 0) {
-     $software = 54;
+     //$software = 54;
+     $GLOBALS['plugin_reason'] = 'Software [Skill-Product not set]';
+        return;
 
     }
     //Multiple matches found, take the first one
